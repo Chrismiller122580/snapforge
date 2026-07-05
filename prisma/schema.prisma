@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  auth0Id           String  @unique
+  email             String  @unique
+  vehicles          Vehicle[]
+}
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id])
+  photoUrl    String
+  makeModel   String
+  year        Int?
+  config      Json     @default("{}") // {paint: 'red', wheels: 'rim123', interiorTrim: 'leather'}
+  createdAt   DateTime @default(now())
+}
+
+model Product {
+  id           String @id @default(cuid())
+  name         String
+  category     String // exterior | interior | wheels
+  type         String
+  price        Float
+  imageUrl     String
+  preview3dUrl String? // glTF placeholder
+  compatible   String[] // JSON array of makes
+}
+
+model UserBuild {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  name      String
+  mods      Json
+  sharedUrl String?
+}
